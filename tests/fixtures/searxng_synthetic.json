@@ -1,0 +1,76 @@
+{
+ "query": "synthetic",
+ "number_of_results": 0,
+ "results": [
+  {
+   "title": "  Release   notes &amp; changes ",
+   "url": "https://www.example.com/releases/?utm_source=feed&id=7#top",
+   "content": "The first   result\nhas messy whitespace.",
+   "engine": "google",
+   "engines": ["google", "bing"],
+   "publishedDate": "2026-11-12T08:30:00",
+   "score": 3.0
+  },
+  {
+   "title": "Duplicate of the first result",
+   "url": "http://example.com/releases?id=7",
+   "content": "Same page, different scheme, host prefix, slash and tracking.",
+   "engines": ["bing"]
+  },
+  {
+   "title": "No URL, skipped",
+   "content": "This result has no url field."
+  },
+  {
+   "title": "Not a web page, skipped",
+   "url": "magnet:?xt=urn:btih:abc",
+   "content": "Torrent link."
+  },
+  {
+   "title": "",
+   "url": "https://docs.example.org/guide",
+   "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.",
+   "engines": ["duckduckgo"],
+   "publishedDate": null
+  },
+  {
+   "title": "Third kept result",
+   "url": "https://news.example.net/story-3",
+   "content": "",
+   "engines": [],
+   "pubdate": "2026-11-10 14:00:00"
+  },
+  {
+   "title": "Fourth kept result",
+   "url": "https://blog.example.com/four",
+   "content": "Four."
+  },
+  {
+   "title": "Fifth kept result",
+   "url": "https://blog.example.com/five",
+   "content": "Five."
+  },
+  {
+   "title": "Sixth kept result, beyond the default limit",
+   "url": "https://blog.example.com/six",
+   "content": "Six."
+  }
+ ],
+ "answers": [
+  {"answer": "42 is the answer", "url": "https://answers.example.com/42", "engine": "wikidata"},
+  "42 is the answer",
+  "A legacy plain-string answer",
+  "A third answer that is dropped"
+ ],
+ "corrections": [],
+ "infoboxes": [
+  {
+   "infobox": "Example Topic",
+   "id": "https://en.wikipedia.org/wiki/Example",
+   "content": "Example Topic is a placeholder used in tests.",
+   "urls": [{"title": "Wikipedia", "url": "https://en.wikipedia.org/wiki/Example"}]
+  }
+ ],
+ "suggestions": ["synthetic data", "synthetic data"],
+ "unresponsive_engines": [["wikipedia", "timeout"], ["brave", "Suspended: too many requests"], ["brave", "duplicate"]]
+}

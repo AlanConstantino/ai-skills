@@ -1,0 +1,26 @@
+Search results for "news" (past week, news): 5 results
+
+1. Nvidia’s stock slump is putting Asia’s AI boom to the test
+   https://www.businessinsider.com/nvidia-stock-jensen-huang-earnings-kospi-tsmc-asia-ai-trade-2026-11
+   Nvidia's stock slump is rattling Asian chipmakers ahead of its earnings, raising questions about the outlook for the region's ...
+
+2. Students must adapt to AI, says education boss
+   https://www.bbc.co.uk/news/articles/cme3dwg49v8vo
+   The head of an education provider has said students will need to adapt to changing employer demands due to new technology and ...
+
+3. Entrepreneur may be the best 'everyday job' of the AI future, says VC investor Alexa von Tobel
+   https://www.msn.com/en-us/money/markets/entrepreneur-may-be-the-best-everyday-job-of-the-ai-future-says-vc-investor-alexa-von-tobel/ar-AA2hu0i7?ocid=BingNewsVerp
+   Alexa von Tobel, LearnVest and Inspired Capital founder, says every American worried about AI should see entrepreneurship as ...
+
+4. How Jensen Huang Built the Backdoor Route That Keeps Beijing in the AI Race
+   https://www.msn.com/en-us/news/other/how-jensen-huang-built-the-backdoor-route-that-keeps-beijing-in-the-ai-race/ar-AA2hswwr?ocid=BingNewsVerp
+   Massive data centers in Southeast Asia provided crucial computing power for Chinese companies and a cover for alleged chip ...
+
+5. AI is still weighing on streamers at Twitch’s biggest event of the year
+   https://www.msn.com/en-ca/technology/artificial-intelligence/ai-is-still-weighing-on-streamers-at-twitch-s-biggest-event-of-the-year/ar-AA2husmv?ocid=BingNewsVerp
+   Months after Twitch stirred backlash for allowing Amazon to train AI models on streamers’ content unless they opt out, some ...
+
+Note: some search engines failed, so results may be incomplete: reuters (HTTP error)
+
+Snippets are previews. To read a page in full, run:
+  python3 <SCRIPTS>/fetch.py URL

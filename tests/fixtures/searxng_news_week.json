@@ -1,0 +1,127 @@
+{
+ "query": "latest AI news",
+ "results": [
+  {
+   "url": "https://www.businessinsider.com/nvidia-stock-jensen-huang-earnings-kospi-tsmc-asia-ai-trade-2026-11",
+   "title": "Nvidia’s stock slump is putting Asia’s AI boom to the test",
+   "content": "Nvidia's stock slump is rattling Asian chipmakers ahead of its earnings, raising questions about the outlook for the region's ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 1.0,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.bbc.co.uk/news/articles/cme3dwg49v8vo",
+   "title": "Students must adapt to AI, says education boss",
+   "content": "The head of an education provider has said students will need to adapt to changing employer demands due to new technology and ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.5,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.msn.com/en-us/money/markets/entrepreneur-may-be-the-best-everyday-job-of-the-ai-future-says-vc-investor-alexa-von-tobel/ar-AA2hu0i7?ocid=BingNewsVerp",
+   "title": "Entrepreneur may be the best 'everyday job' of the AI future, says VC investor Alexa von Tobel",
+   "content": "Alexa von Tobel, LearnVest and Inspired Capital founder, says every American worried about AI should see entrepreneurship as ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.3333333333333333,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.msn.com/en-us/news/other/how-jensen-huang-built-the-backdoor-route-that-keeps-beijing-in-the-ai-race/ar-AA2hswwr?ocid=BingNewsVerp",
+   "title": "How Jensen Huang Built the Backdoor Route That Keeps Beijing in the AI Race",
+   "content": "Massive data centers in Southeast Asia provided crucial computing power for Chinese companies and a cover for alleged chip ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.25,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.msn.com/en-ca/technology/artificial-intelligence/ai-is-still-weighing-on-streamers-at-twitch-s-biggest-event-of-the-year/ar-AA2husmv?ocid=BingNewsVerp",
+   "title": "AI is still weighing on streamers at Twitch’s biggest event of the year",
+   "content": "Months after Twitch stirred backlash for allowing Amazon to train AI models on streamers’ content unless they opt out, some ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.2,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.cnbc.com/2026/11/15/caterpillar-buy-kevin-simpson.html",
+   "title": "I've owned this stock for a decade. AI slowdown fears gave me an opportunity to buy more",
+   "content": "Caterpillar is an established business with exposure to the infrastructure needed to power AI and the broader economy.",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.16666666666666666,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.msn.com/en-us/money/general/is-bad-news-for-jensen-huang-also-bad-news-for-the-ai-industry/ar-AA2hujSk?ocid=BingNewsVerp",
+   "title": "Is bad news for Jensen Huang also bad news for the AI industry?",
+   "content": "\"Jensen is Nvidia, right? And so much of this economy is riding on Nvidia.\" ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.14285714285714285,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.thestreet.com/fed/fed-rate-hike-fears-december-inflation-2027",
+   "title": "Fed rate hikes could stretch into 2027 as darker threats loom",
+   "content": "The CME Group’s FedWatch Tool projects roughly a 93% chance of a 25 basis-point hike at the FOMC December meeting, a 67% ...",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "bing news"
+   ],
+   "score": 0.125,
+   "category": "news",
+   "publishedDate": null
+  }
+ ],
+ "answers": [],
+ "corrections": [],
+ "infoboxes": [],
+ "suggestions": [],
+ "unresponsive_engines": [
+  [
+   "reuters",
+   "HTTP error"
+  ]
+ ]
+}

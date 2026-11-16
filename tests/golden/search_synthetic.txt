@@ -1,0 +1,31 @@
+Search results for "synthetic": 5 results
+
+Direct answer: 42 is the answer (https://answers.example.com/42)
+Direct answer: A legacy plain-string answer
+Summary - Example Topic: Example Topic is a placeholder used in tests. (https://en.wikipedia.org/wiki/Example)
+
+1. Release notes & changes
+   https://www.example.com/releases/?utm_source=feed&id=7#top
+   Published: 2026-11-12
+   The first result has messy whitespace.
+
+2. (no title)
+   https://docs.example.org/guide
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse…
+
+3. Third kept result
+   https://news.example.net/story-3
+   Published: 2026-11-10
+
+4. Fourth kept result
+   https://blog.example.com/four
+   Four.
+
+5. Fifth kept result
+   https://blog.example.com/five
+   Five.
+
+Note: some search engines failed, so results may be incomplete: brave (Suspended: too many requests); wikipedia (timeout)
+
+Snippets are previews. To read a page in full, run:
+  python3 <SCRIPTS>/fetch.py URL

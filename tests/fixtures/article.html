@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Widget 2.0 Released &ndash; Example Blog</title>
+  <style>body { font-family: sans-serif; }</style>
+  <script>window.tracking = "should never appear";</script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="logo">Example Blog</div>
+    <nav><ul><li><a href="/">Home</a></li><li><a href="/about">About</a></li></ul></nav>
+  </header>
+  <div id="cookie-banner">We use cookies. <button>Accept all</button></div>
+  <main id="main">
+    <article>
+      <header>
+        <h1>Widget 2.0 Released</h1>
+        <p class="byline">By Jane Doe &middot; <time>2026-11-12</time></p>
+      </header>
+      <p>Widget&nbsp;2.0 is out today. It is <strong>twice as fast</strong> and adds a
+         new <code>widget.run()</code> API.</p>
+      <svg><title>chart icon</title><path d="M0 0"/></svg>
+      <h2>What changed</h2>
+      <ol>
+        <li>Faster startup
+        <li>New API
+          <ul>
+            <li>run()
+            <li>stop()
+          </ul>
+        <li>Fewer dependencies
+      </ol>
+      <h2>Benchmarks</h2>
+      <table>
+        <thead><tr><th>Version<th>Startup</thead>
+        <tbody>
+          <tr><td>1.0<td>120 ms
+          <tr><td>2.0<td>60 ms
+        </tbody>
+      </table>
+      <h2>Upgrade</h2>
+      <pre><code>pip install --upgrade widget
+widget --version   # prints 2.0</code></pre>
+      <blockquote><p>The best release yet.</p></blockquote>
+      <dl><dt>License</dt><dd>MIT</dd><dt>Python</dt><dd>3.9+</dd></dl>
+      <p>Line one<br>Line two</p>
+      <p hidden>Hidden paragraph.</p>
+      <p style="display: none">Invisible paragraph.</p>
+      <div aria-hidden="true">Decorative text.</div>
+      <aside>Related: Widget 1.9 notes</aside>
+      <form><label>Subscribe</label><input type="email"></form>
+      <footer>Tags: release, widget</footer>
+    </article>
+  </main>
+  <aside class="sidebar">Popular posts</aside>
+  <footer class="site-footer">&copy; 2026 Example Blog</footer>
+  <script>console.log("tail script");</script>
+</body>
+</html>
