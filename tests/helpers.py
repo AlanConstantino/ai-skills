@@ -71,6 +71,8 @@ class _Handler(BaseHTTPRequestHandler):
             time.sleep(1.5)
         if q == "news":
             return self._send(200, "application/json", fixture_bytes("searxng_news_week.json"))
+        if q == "openai":
+            return self._send(200, "application/json", fixture_bytes("searxng_news_openai.json"))
         if q == "empty":
             body = {"query": q, "results": [], "suggestions": ["emptier", "empty set"],
                     "corrections": ["empt"], "unresponsive_engines": [["google", "CAPTCHA"]]}

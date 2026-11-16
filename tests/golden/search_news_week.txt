@@ -22,5 +22,7 @@ Search results for "news" (past week, news): 5 results
 
 Note: some search engines failed, so results may be incomplete: reuters (HTTP error)
 
+Note: with --time-range, only 1 search engine answered (bing news). For broader results, search again without --time-range.
+
 Snippets are previews. To read a page in full, run:
   python3 <SCRIPTS>/fetch.py URL

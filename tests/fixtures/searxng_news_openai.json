@@ -1,0 +1,159 @@
+{
+ "query": "OpenAI",
+ "results": [
+  {
+   "url": "https://www.cnbc.com/2026/11/13/openai-chatgpt-wallet-dot-purchases.html",
+   "title": "OpenAI launches ChatGPT Wallet, allowing its 'dots' AI agents to make purchases for users",
+   "content": "OpenAI's ChatGPT Wallet partners with American Express, Mastercard and Visa, and those cardholders keep their existing credit card rewards.",
+   "metadata": "2 days ago | CNBC",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news",
+    "brave.news"
+   ],
+   "score": 7.5,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://www.businessinsider.com/ex-openai-researcher-says-ai-accident-could-be-your-killer-2026-11",
+   "title": "Former OpenAI researcher says the 'most likely reason' you will die is due to 'an AI accident'",
+   "content": "Paul Christiano, founder of the Alignment Research Center, warns that powerful AI agents could deceive overseers and escape human control.",
+   "metadata": "21 hours ago | Insider",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news",
+    "brave.news"
+   ],
+   "score": 3.2727272727272725,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://mashable.com/tech/openai-launches-chatgpt-wallet",
+   "title": "OpenAI launches ChatGPT Wallet, claiming it's a safe way to have AI shop for you",
+   "content": "According to OpenAI, ChatGPT Wallet will let AI agents make purchases for users without sharing their credit card information each time. In addition, \"security checks\" are required for every purchase an AI agent makes. This entails a human user manually reviewing and approving every purchase.",
+   "metadata": "2 days ago | Mashable",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news"
+   ],
+   "score": 1.0666666666666667,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "template": "default.html",
+   "title": "Exclusive: OpenAI disbands its stand-alone robotics team as its general-purpose AI models start running robots | Fortune",
+   "content": "OpenAI moved its robotics researchers onto other teams representing new thinking about the best way to build general-purpose robots.",
+   "publishedDate": null,
+   "pubdate": "3 days ago",
+   "length": null,
+   "views": "",
+   "author": "",
+   "metadata": "",
+   "priority": "",
+   "engines": [
+    "brave.news"
+   ],
+   "open_group": false,
+   "close_group": false,
+   "score": 1.0,
+   "category": "news",
+   "url": "https://fortune.com/2026/11/13/openai-disbands-robotics-team-as-its-general-models-start-running-robots/",
+   "engine": "brave.news"
+  },
+  {
+   "url": "https://www.economist.com/business/2026/11/15/anthropics-giant-ipo-puts-the-heat-on-openai",
+   "title": "Anthropic’s giant IPO puts the heat on OpenAI",
+   "content": "Claude Code, Anthropic's software-writing bot, was launched in early 2025, but this year has experienced explosive growth. As a result, Goldman Sachs, the lead investment bank on its IPO, expects the company to pull in $53bn of revenue this year,",
+   "metadata": "11 hours ago | The Economist",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news"
+   ],
+   "score": 0.5714285714285714,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "template": "default.html",
+   "title": "Introducing ChatGPT Wallet | OpenAI",
+   "content": "Introducing ChatGPT Wallet, a secure way for agents in ChatGPT Work, Codex, and dots to complete purchases with user approval and existing card protections.",
+   "publishedDate": null,
+   "pubdate": "2 days ago",
+   "length": null,
+   "views": "",
+   "author": "",
+   "metadata": "",
+   "priority": "",
+   "engines": [
+    "brave.news"
+   ],
+   "open_group": false,
+   "close_group": false,
+   "score": 0.3333333333333333,
+   "category": "news",
+   "url": "https://openai.com/index/introducing-chatgpt-wallet/",
+   "engine": "brave.news"
+  },
+  {
+   "url": "https://finance.yahoo.com/technology/ai/articles/more-pain-nvda-top-supply-050330578.html",
+   "title": "More Pain For NVDA? Top Supply Chain Analyst Says New OpenAI, Anthropic Chip Orders Boost Google’s TPU Outlook",
+   "content": "The orders extend Google TPU shipment visibility to 2029, while Nvidia GPUs and other AI accelerators mostly have visibility through 2027 or 2028, according to Ming-Chi Kuo.",
+   "metadata": "2 hours ago | Yahoo Finance",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news"
+   ],
+   "score": 0.3269230769230769,
+   "category": "news",
+   "publishedDate": null
+  },
+  {
+   "url": "https://finance.yahoo.com/technology/ai/articles/nvidia-problem-openai-90-plus-180950788.html",
+   "title": "Nvidia’s Problem: OpenAI Is “90 Plus Percent Nvidia,” and It’s the Lab Burning Cash",
+   "content": "Key TakeawaysOpenAI's adjusted operating margin is negative 109%; Anthropic's is about 15% positive on an adjusted basis. OpenAI runs 90-plus percent on NVIDIA; Anthropic, one third or less, per SemiAnalysis's Dylan Patel.",
+   "metadata": "13 hours ago | Yahoo Finance",
+   "engine": "bing news",
+   "template": "default.html",
+   "priority": "",
+   "engines": [
+    "duckduckgo news",
+    "bing news"
+   ],
+   "score": 0.30917874396135264,
+   "category": "news",
+   "publishedDate": null
+  }
+ ],
+ "answers": [],
+ "corrections": [],
+ "infoboxes": [],
+ "suggestions": [],
+ "unresponsive_engines": [
+  [
+   "google news",
+   "Suspended: access denied"
+  ],
+  [
+   "reuters",
+   "HTTP error"
+  ]
+ ]
+}

@@ -54,6 +54,25 @@ class NormalizeTest(unittest.TestCase):
             [{"engine": "brave", "reason": "Suspended: too many requests"}, {"engine": "wikipedia", "reason": "timeout"}],
         )
 
+    def test_dates_and_outlets(self):
+        cases = [
+            ({"publishedDate": "2026-11-12T08:30:00"}, ("2026-11-12", "")),
+            ({"pubdate": "3 days ago"}, ("3 days ago", "")),
+            ({"metadata": "2 days ago | CNBC"}, ("2 days ago", "CNBC")),
+            ({"metadata": "CNBC | 21 hours ago"}, ("21 hours ago", "CNBC")),
+            ({"pubdate": "Yesterday", "metadata": "5 hours ago | BBC"}, ("Yesterday", "BBC")),
+            ({"metadata": "Nov 14, 2026 | Reuters"}, ("Nov 14, 2026", "Reuters")),
+            ({"metadata": "14 November 2026"}, ("14 November 2026", "")),
+            ({"metadata": "1,234 views | some channel"}, ("", "")),  # not a date: ignore the field
+            ({"pubdate": "a very long free-text field that merely mentions something ago"}, ("", "")),
+            ({"publishedDate": None, "metadata": None}, ("", "")),
+        ]
+        for item, expected in cases:
+            self.assertEqual(search._published_and_source(item), expected, item)
+
+    def test_engines_used(self):
+        self.assertEqual(self.normalize()["engines_used"], ["bing", "duckduckgo", "google"])
+
     def test_build_search_url_has_fixed_order(self):
         url = search.build_search_url("http://s", "a b", time_range="week", categories="news", language="en", page=2)
         self.assertEqual(
@@ -75,6 +94,23 @@ class SearchCliTest(ServerTestCase):
         code, out, _ = self.search("news", "--news", "--time-range", "week")
         self.assertEqual(code, 0)
         assert_golden(self, "search_news_week.txt", stable(out))
+
+    def test_multi_engine_news_matches_golden(self):
+        code, out, _ = self.search("openai", "--news")
+        self.assertEqual(code, 0)
+        self.assertIn("Published: 2 days ago (CNBC)", out)
+        self.assertNotIn("--time-range", out)
+        assert_golden(self, "search_news_openai.txt", stable(out))
+
+    def test_narrow_time_range_note(self):
+        _, out, _ = self.search("news", "--news", "--time-range", "week")
+        self.assertIn("Note: with --time-range, only 1 search engine answered (bing news).", out)
+        _, out, _ = self.search("news", "--news")
+        self.assertNotIn("Note: with --time-range", out)  # no time range, no note
+        _, out, _ = self.search("openai", "--news", "--time-range", "week")
+        self.assertNotIn("Note: with --time-range", out)  # several engines answered
+        _, out, _ = self.search("empty", "--time-range", "day")
+        self.assertIn("Note: with --time-range, no search engine returned results.", out)
 
     def test_output_is_deterministic(self):
         runs = {self.search("synthetic", "--max-results", "3")[1] for _ in range(5)}

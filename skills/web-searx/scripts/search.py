@@ -44,7 +44,17 @@ DEFAULT_TIMEOUT = 15.0
 TIME_RANGES = ("day", "week", "month", "year")
 TIME_RANGE_LABELS = {"day": "past day", "week": "past week", "month": "past month", "year": "past year"}
 
+MAX_DATE_TEXT = 40
+MAX_SOURCE_CHARS = 60
+
 _DATE_PREFIX = re.compile(r"^(\d{4}-\d{2}-\d{2})")
+_MONTH = r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?"
+_HUMAN_DATE = re.compile(
+    r"\b(ago|yesterday|today|just now)\b"
+    rf"|^{_MONTH} \d{{1,2}},? \d{{4}}$"
+    rf"|^\d{{1,2}} {_MONTH},? \d{{4}}$",
+    re.I,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -129,14 +139,40 @@ def request_json(url: str, api_key: str, timeout: float) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _published_date(item: dict) -> str:
+def _date_text(value: str) -> str:
+    """An ISO date as YYYY-MM-DD, or a short human date ("2 days ago", "Nov 14, 2026") as given."""
+    value = clean_inline(value)
+    match = _DATE_PREFIX.match(value)
+    if match:
+        return match.group(1)
+    if len(value) <= MAX_DATE_TEXT and _HUMAN_DATE.search(value):
+        return value
+    return ""
+
+
+def _published_and_source(item: dict) -> tuple:
+    """Publication date and outlet. News engines often send them only as "2 days ago | CNBC" metadata.
+
+    Relative dates are passed through unchanged rather than resolved against the clock,
+    so the output depends only on the SearXNG response.
+    """
+    published = ""
     for key in ("publishedDate", "pubdate"):
         value = item.get(key)
-        if isinstance(value, str):
-            match = _DATE_PREFIX.match(value.strip())
-            if match:
-                return match.group(1)
-    return ""
+        if isinstance(value, str) and not published:
+            published = _date_text(value)
+    source = ""
+    metadata = item.get("metadata")
+    if isinstance(metadata, str):
+        parts = [clean_inline(part) for part in metadata.split("|") if clean_inline(part)]
+        dates = [part for part in parts if _date_text(part)]
+        # Only trust the other parts as an outlet name when the field is clearly "date | outlet".
+        if dates:
+            published = published or _date_text(dates[0])
+            others = [part for part in parts if part not in dates]
+            if others:
+                source = truncate_words(others[0], MAX_SOURCE_CHARS)
+    return published, source
 
 
 def _engines(item: dict) -> list:
@@ -160,13 +196,15 @@ def normalize_results(raw_results: list, max_results: int) -> list:
         if key in seen:
             continue
         seen.add(key)
+        published, source = _published_and_source(item)
         results.append(
             {
                 "rank": len(results) + 1,
                 "title": clean_inline(str(item.get("title") or "")) or "(no title)",
                 "url": url,
                 "snippet": truncate_words(clean_inline(str(item.get("content") or "")), SNIPPET_CHARS),
-                "published": _published_date(item),
+                "published": published,
+                "source": source,
                 "engines": _engines(item),
             }
         )
@@ -230,11 +268,13 @@ def normalize_failed_engines(raw: list) -> list:
 
 
 def normalize_response(payload: dict, query: str, max_results: int, filters: dict) -> dict:
+    results = normalize_results(payload.get("results") or [], max_results)
     return {
         "ok": True,
         "query": query,
         "filters": filters,
-        "results": normalize_results(payload.get("results") or [], max_results),
+        "results": results,
+        "engines_used": sorted({engine for item in results for engine in item["engines"]}),
         "answers": normalize_answers(payload.get("answers") or []),
         "infobox": normalize_infobox(payload.get("infoboxes") or []),
         "suggestions": normalize_suggestions(payload),
@@ -285,8 +325,12 @@ def render_text(data: dict) -> str:
     for item in results:
         lines.append(f"{item['rank']}. {item['title']}")
         lines.append(f"   {item['url']}")
-        if item["published"]:
+        if item["published"] and item["source"]:
+            lines.append(f"   Published: {item['published']} ({item['source']})")
+        elif item["published"]:
             lines.append(f"   Published: {item['published']}")
+        elif item["source"]:
+            lines.append(f"   Source: {item['source']}")
         if item["snippet"]:
             lines.append(f"   {item['snippet']}")
         lines.append("")
@@ -297,6 +341,14 @@ def render_text(data: dict) -> str:
     if data["failed_engines"]:
         failed = "; ".join(f"{e['engine']} ({e['reason']})" for e in data["failed_engines"])
         lines.append(f"Note: some search engines failed, so results may be incomplete: {failed}")
+        lines.append("")
+    # Many SearXNG engines skip requests with a time range, which can leave a single source.
+    if data["filters"].get("time_range") and len(data["engines_used"]) <= 1:
+        if data["engines_used"]:
+            used = f"only 1 search engine answered ({data['engines_used'][0]})"
+        else:
+            used = "no search engine returned results"
+        lines.append(f"Note: with --time-range, {used}. For broader results, search again without --time-range.")
         lines.append("")
     if results:
         lines.append("Snippets are previews. To read a page in full, run:")
