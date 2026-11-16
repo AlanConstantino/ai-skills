@@ -12,6 +12,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
         python: ["3.9", "3.12", "3.x"]
+        exclude:
+          # Current Ubuntu runners no longer ship Python 3.9; macOS still tests it.
+          - os: ubuntu-latest
+            python: "3.9"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
