@@ -1,6 +1,6 @@
 {
   "name": "web-searx",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Web search and page reading for AI agents, backed by your own SearXNG instance.",
   "keywords": ["pi-package", "agent-skill", "searxng", "web-search", "local-llm"],
   "license": "MIT",

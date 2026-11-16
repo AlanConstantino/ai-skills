@@ -1,6 +1,6 @@
 # web-searx
 
-> **Status: under development (v0.1.0, pre-release).** It works and is tested, but command
+> **Status: under development (v0.1.1, pre-release).** It works and is tested, but command
 > options and output format may still change before 1.0. Pin a tag if you depend on it.
 
 A web search skill for AI agents, frontier and local, backed by your own
@@ -57,7 +57,7 @@ git clone https://github.com/AlanConstantino/web-searx.git ~/web-searx
 |---|---|
 | Claude Code | `ln -s ~/web-searx/skills/web-searx ~/.claude/skills/web-searx` |
 | Codex and other Agent Skills hosts | `ln -s ~/web-searx/skills/web-searx ~/.agents/skills/web-searx` |
-| [pi](https://pi.dev) | `pi install git:github.com/AlanConstantino/web-searx@v0.1.0`, or the `~/.agents/skills` link above |
+| [pi](https://pi.dev) | `pi install git:github.com/AlanConstantino/web-searx@v0.1.1`, or the `~/.agents/skills` link above |
 | Anything that runs shell commands | Point the model at `skills/web-searx/SKILL.md` |
 
 ## Configure
@@ -94,6 +94,11 @@ python3 scripts/search.py QUERY [options]
   --timeout S                  seconds, default 15
   --json                       structured output
 ```
+
+Many SearXNG engines skip requests that carry a time range, so `--news --time-range week`
+can leave a single engine. News results already favor recent stories: use `--news` on its
+own, and keep `--time-range` for other searches. When a time range leaves one engine,
+the output says so.
 
 Example output:
 

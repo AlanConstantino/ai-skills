@@ -4,7 +4,7 @@ description: Search the web and read web pages through the user's own SearXNG in
 license: MIT
 compatibility: Python 3.9+ and a SearXNG instance with JSON output enabled.
 metadata:
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Web search

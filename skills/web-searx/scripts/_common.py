@@ -14,7 +14,7 @@ import sys
 import urllib.parse
 from pathlib import Path
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 USER_AGENT = "Mozilla/5.0 (compatible; web-searx-skill/0.1)"
 SCRIPTS_DIR = Path(__file__).resolve().parent
 
