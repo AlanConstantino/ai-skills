@@ -1,8 +1,10 @@
-name: tests
+name: web-searx tests
 
 on:
   push:
+    paths: ["skills/web-searx/**", ".github/workflows/test.yml"]
   pull_request:
+    paths: ["skills/web-searx/**", ".github/workflows/test.yml"]
 
 jobs:
   test:
@@ -22,5 +24,5 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Run offline tests
-        working-directory: tests
+        working-directory: skills/web-searx/tests
         run: python -m unittest -v

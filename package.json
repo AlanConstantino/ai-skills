@@ -1,13 +1,11 @@
 {
-  "name": "web-searx",
-  "version": "0.1.1",
-  "description": "Web search and page reading for AI agents, backed by your own SearXNG instance.",
-  "keywords": ["pi-package", "agent-skill", "searxng", "web-search", "local-llm"],
-  "license": "MIT",
+  "name": "ai-skills",
+  "description": "A collection of useful agent skills.",
+  "keywords": ["pi-package", "agent-skill"],
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlanConstantino/web-searx.git"
+    "url": "git+https://github.com/AlanConstantino/ai-skills.git"
   },
   "pi": {
     "skills": ["./skills"]

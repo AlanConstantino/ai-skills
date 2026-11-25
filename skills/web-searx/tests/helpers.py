@@ -16,7 +16,7 @@ from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS = ROOT / "skills" / "web-searx" / "scripts"
+SCRIPTS = ROOT / "scripts"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 GOLDEN = Path(__file__).resolve().parent / "golden"
 sys.path.insert(0, str(SCRIPTS))
