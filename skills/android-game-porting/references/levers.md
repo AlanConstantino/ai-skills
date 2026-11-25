@@ -104,6 +104,14 @@ Ordered from highest payoff ÷ effort to deepest engineering work.
   - Small-pool slabs (`DM_VK_POOL_SLABS`) & buffer reuse (`DM_VK_POOL_REUSE`): eliminates ~0.9 ms/pool gralloc churn during loads (*Pokémon Scarlet*: 1,000–2,000 small pools/sec).
 - **[G] Lazy zero-copy backing (`DM_VK_ZEROCOPY_LAZY`):** mandatory on write-combined `AHardwareBuffer` devices (Retroid Pocket 5: 1.7 GB/s vs 18 GB/s `malloc` → *Pokémon Legends: Z-A* replay **24 → 12 ms**) and on games reserving multi-GB sparse/unused pools to avoid LMK kills.
 - **[G] SVC lock spin-before-park (`DM_SVC_SPIN`):** cuts job-thread handoff stalls dramatically (*Pokémon Scarlet* capture stall **~630 → ~360 ms**).
+- **[G] Whole-texture re-uploads after partial CPU writes (combat/effect dips):** if the replay's upload counter shows MB a frame that,
+  times the seconds played, far exceeds the game's texture memory, the same textures are being uploaded again. Find which ones (per-texture
+  upload stats in a diagnostic build) and what dirties them. A write API that updates a region (NVN `WriteTexels`, `glTexSubImage`-style
+  calls) but marks the whole storage written makes every small write a full deswizzle + upload.
+  - **Fix:** mark only the level/layer slices written, and re-upload only slices with written pages. Keep GPU-written, linear, CPU-decoded
+    and sparse images on whole uploads. Ship it behind a live kill switch, and unit-test the slice layout with the swizzler as oracle.
+  - *NieR:Automata* (RP6, 30 fps): ~70 `WriteTexels` a frame into 16 MB and 32 MB 512x512 arrays. Uploads **7-33 MB → 0.4-1 MB a frame**, replay
+    **11.3-12.0 → 9.1-9.6 ms**, hitches over 40 ms **66-75 → 1 per 90 s** (`DM_VK_PKG_PART`). Full case: `examples/case-nier-30fps-combat-dips.md`.
 
 ### 4. Frame pacing, ADPF, clock drift & FPS cuts
 - **[G] Pin FPS directly (`DM_FPS_PIN=40|60`) before blaming hardware:** separates timid adaptive governors from real GPU/CPU limits (*NEO* crowd held 40 fps pinned, GPU **20.6 → 15.2 ms** once clocks rose).
@@ -117,7 +125,15 @@ Ordered from highest payoff ÷ effort to deepest engineering work.
 - **[G] NEON video decode + GOB block-linear upload (`DM_MOVIE_FAST=1`):** *MMBN Legacy Collection* 1080p launcher went **30 → 60 fps** (NV12→RGBA 9.9 → 3.3 ms, WriteTexels 5.0 → 2.5 ms).
 - **[G] Six-axis gravity fusion:** fuse accelerometer gravity with gyro via a Mahony filter so motion aiming does not drift diagonally.
 
-### 6. Labelled quality trades (explicit user approval required)
+### 6. Device power profile (the cooling lever, after the frame has headroom)
+- **[S: Android handhelds] Vendor performance / fan modes** (e.g. Retroid's `settings system performance_mode`) can pin every CPU
+  cluster at max and set a high GPU floor, even in menus or with the screen off: read the clocks with the game closed to see it. Once a fix leaves GPU headroom (measure pure
+  GPU first), a lower mode lets DVFS drop clocks at no cost in smoothness.
+  - *NieR:Automata* (RP6, 30 fps, after the re-upload fix, GPU 27 ms p95 of 33.3): mode 2 → 1 dropped the GPU floor 615 → 550 MHz.
+    CPU max **80.7 → 77.5 °C**, GPU **65.9 → 63.7 °C**, hitches **2, 0 → 0, 0** per 4 minutes.
+  - These settings are device-wide (every game): measure, recommend, restore the user's value, and let them decide. Mode 0 still has to be shown not to drop frames.
+
+### 7. Labelled quality trades (explicit user approval required)
 - **[G]** Only after load/store A/B proves you are at the game's shading floor:
   - Static render scale (`DM_RENDER_SCALE=0.75–0.90`) or dynamic resolution (`DM_DYN_SCALE=low|medium|high`).
   - Note diminishing returns: *Tears of the Kingdom* pond `1.0 → 0.6` saved only **2.6 ms** of GPU p90 because geometry/CPU/fixed passes dominated — always measure the actual gain before trading clarity!

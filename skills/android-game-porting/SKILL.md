@@ -39,7 +39,8 @@ Detailed references, read when needed:
 - `references/levers.md`: ranked correctness bug classes and performance levers, tagged `[G]` general vs `[S: stack/GPU]`, with real measured evidence.
 - `references/gotchas.md`: Android, Adreno/Turnip, Vulkan, ADB, save-safety, and CI traps found the hard way.
 - `references/qualification.md`: profile-vs-core rules, clean release gates, cross-game regression checks, soak tests, and publishing hygiene.
-- `scripts/`: stdlib-only harness — frame/memory ceiling calculator (`budget.py`), ADB thermal/CPU/RAM sampler (`device_health.sh`), experiment & ledger runner (`probe.py`), raw float32/HDR NaN auditor (`f32_audit.py`), and portable single-device queue (`queue.sh`).
+- `examples/case-nier-30fps-combat-dips.md`: one complete, hands-off Ladder B climb with every number (countable baseline → diagnostic build → core fix → live A/B pairs → cooling lever → release check). Read it first when the request is "dips", "stutter in combat" or "runs hot".
+- `scripts/`: stdlib-only harness — frame/memory ceiling calculator (`budget.py`), ADB thermal/CPU/RAM sampler (`device_health.sh`), experiment & ledger runner plus per-toggle log windows (`probe.py`), hands-off live A/B driver with a guarded input loop (`ab_windows.sh`), raw float32/HDR NaN auditor (`f32_audit.py`), and portable single-device queue (`queue.sh`).
 
 ## 0. Before touching anything
 
@@ -85,6 +86,7 @@ If the user's FPS target sits above the measured shading or thermal ceiling, say
 6. **Respect the shared device and user saves:**
    - Always check `adb shell pidof <pkg>` before force-stopping, reinstalling, or pushing files. Never interrupt a running game the user is playing without asking.
    - **Never press Confirm (`A`) blindly** in a user's save — blind confirm inputs advance story state and overwrite saves. Use a verified gameplay detector or stick-only soak loops (`soak`).
+   - **Hands-off on request:** when the user asks to stay out of the loop, run live A/B pairs on a bench save with `scripts/ab_windows.sh` (its input loop refuses Confirm/menu buttons) and restore every switch and device setting at the end (`references/methodology.md` §8).
    - **No unattended screenshot-scoring loops.** When a human is holding the device, use them as the visual oracle; whenever a screenshot is captured, inspect the actual image yourself rather than trusting a heuristic score.
    - Install test builds under a separate test package when possible, or confirm before overwriting the user's install, and preserve their saves.
 7. **Semantic fixes, never hacks:**
@@ -118,7 +120,7 @@ Order by typical payoff ÷ engineering cost (`references/levers.md`):
 
 1. **Driver & zero-build runtime switches:** Turnip vs Qualcomm driver, `UBWC` format lists (often −25–40% GPU), `DM_GPU_TURBO=need/auto`, `DM_VK_MT_REPLAY=1`, `DM_NVN_ASYNC=1`, `DM_VK_CB_DRAWS` (respecting LRZ cut rules), `DM_VK_ASYNC_PIPE=1`.
 2. **Frame overlap & sync waits:** trace render-thread `SyncWait` / submission fences so CPU replay overlaps GPU execution instead of serializing.
-3. **Pass, descriptor & memory-pool overhead:** defer in-pass uniform updates (with heap shadows), keep passes across identical targets (never across write→read barriers), dynamic UBO offsets + descriptor/view reuse, pool slabs & reuse, lazy zero-copy on slow-read hardware-buffer devices, SVC lock spin-before-park.
+3. **Pass, descriptor, upload & memory-pool overhead:** whole-texture re-uploads after partial CPU writes (check MB uploaded a frame first: × seconds ≫ texture memory means re-uploads), defer in-pass uniform updates (with heap shadows), keep passes across identical targets (never across write→read barriers), dynamic UBO offsets + descriptor/view reuse, pool slabs & reuse, lazy zero-copy on slow-read hardware-buffer devices, SVC lock spin-before-park.
 4. **Frame pacing, ADPF & engine rate cuts:** pin FPS directly (`DM_FPS_PIN`) to separate governor bugs from real load; register busiest guest threads in ADPF; match window rate to game rate; fix frame-clock overshoot drift; apply clean build-keyed 60 fps cuts where the engine supports them.
 5. **Media & CPU hotspots:** NEON video decode/upload, profile replay/host threads only (never SIGPROF guest code mid-load).
 6. **Labelled quality trades (explicit user consent required):** static or dynamic render scale, shader precision, mip bias. Never apply silently.

@@ -33,6 +33,9 @@ Every trap below burned real hours on a real device. Re-check on newer drivers/O
 - **In-process `SIGPROF` (`DM_VK_PROF`) can crash guest code during loads.** Arm profiling *after* loading completes, or profile host/replay threads only (`DM_NVN_ASYNC=1`).
 - **8-bit PPM/PNG screenshots hide HDR NaN/Inf origins.** Always dump raw `.f32` (`DM_VK_PASSDUMP_RAW=1`) and run `scripts/f32_audit.py`.
 - **`adb shell input tap` is too short for game touchscreens** (fine for Android UI/pause menus, missed by 30/60 Hz game polling). Use `adb shell input swipe x y x y 150` or held `DM_CTL` presses (`0.4 s` safe default).
+- **A "shown late" display-timing counter can stay 0 at 30 fps on a 60 Hz window** even with 50 ms frames (seen on nx2android's
+  `display timing` line). Count long frames over ~1.2× the budget (`probe.py parse-log --hitch-ms 40`) instead.
+- **Frame p50 hides dips.** p50 stayed 33.4 ms in both arms of an A/B where hitches went 66-75 → 1. Judge "dips" by hitch count per window.
 - **Single stationary screenshots miss async/LRZ flicker.** Always validate async replay, CB splits, and LRZ fixes with camera turns and movement recordings.
 
 ## Host, ADB, disk & CI traps
@@ -42,5 +45,13 @@ Every trap below burned real hours on a real device. Re-check on newer drivers/O
 - **Disk hygiene:** game dumps, extracted RomFS, and pass dumps easily consume 50–300 GB. Keep all dumps under one git-ignored folder using hard links (`ln`) so original ROMs are never copied or modified, and check link count ≥ 2 before deleting anything.
 - **Cross-platform CI stubs:** adding a global symbol or helper in shared Vulkan/C runtime code can break standalone unit-test C harnesses (e.g. indirect compute or readiness harnesses on `linux-gcc`, `linux-clang`, `macos`, `windows`) unless every sibling test harness stubs or links it cleanly. Run the full test suite and check all CI matrix targets.
 - **Git remotes & branches:** keep personal/fork experiments strictly on your personal fork remote; keep upstream PRs in clean worktrees branched off `origin/main` with zero personal mods mixed in.
+- **An A/B script that ends on a candidate value leaves it live.** The next experiment then runs with it silently. Always restore
+  (`ab_windows.sh` `RESTORE=`) and grep the log's last toggle line before trusting a later run.
+- **Release builds ignore `ctl.txt`.** `adb shell input gamepad keyevent <KEYCODE_BUTTON_*>` reaches the game as a controller button there, through
+  the *user's button remap* (check the app's settings first: on one RP6 Switch A was `KEYCODE_BUTTON_B`). It has no stick input, so movement loops need a debug build.
+- **Window markers written as unknown switches log warnings.** Mark a device-setting window with a name the host does not parse (e.g.
+  `env PERF_performance_mode=1`), not a fake `DM_` switch, or the red-line count of every window goes up.
+- **Device-wide settings changed over adb outlive the game** (`settings put system performance_mode`, refresh rate, fan mode). Record the value first and restore it.
+- **Shell aliases leak into scripts:** a colour `ls` alias put escape codes into a path and made a byte-identical save compare say "differs". Use `command ls` / `cmp` on explicit paths.
 - **Windows / Git Bash paths:** set `MSYS_NO_PATHCONV=1` before passing `/sdcard/...` or `/data/local/tmp/...` to `adb`, and use response files for long Clang link lines (`WinError 206`).
 - **Secrets & copyright hygiene:** never commit `prod.keys`, `title.keys`, console firmware, game binaries/assets, or absolute home-directory paths into any repo, profile comment, or bug report.

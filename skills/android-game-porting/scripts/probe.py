@@ -5,7 +5,8 @@ Standard library only (Python 3.9+).
 
   python3 probe.py inventory [--serial S] [--pkg P] [--json]
   python3 probe.py backup-saves --pkg P --out DIR [--serial S] [--remote-path PATH]
-  python3 probe.py parse-log path/to/log.txt [--preset nx2android|generic] [--config cfg.json] [--json]
+  python3 probe.py parse-log path/to/log.txt [--preset nx2android|generic] [--config cfg.json] [--hitch-ms 40] [--json]
+  python3 probe.py windows path/to/log.txt [--marker REGEX] [--hitch-ms 40] [--json]
   python3 probe.py run configs/NAME.json [--ledger ledger.jsonl] [--allow-running]
   python3 probe.py compare ledger.jsonl ctl-a cand-1 ctl-b [--metric frame_p50_ms] [--tol 0.03]
   python3 probe.py show [ledger.jsonl]
@@ -28,12 +29,18 @@ HERE = Path(__file__).resolve().parent
 HEALTH_SH = HERE / "device_health.sh"
 
 # Built-in nx2android / nxnative telemetry patterns
+# (newer hosts write "frame time p50"; older ones "frame p50")
 RE_NVN_TIMING = re.compile(
-    r"timing up to frame \d+:.*?frame p50\s+([0-9.]+)\s*/\s*p95\s+([0-9.]+)\s*/\s*max\s+([0-9.]+)\s*ms"
+    r"timing up to frame \d+:.*?frame (?:time )?p50\s+([0-9.]+)\s*/\s*p95\s+([0-9.]+)\s*/\s*max\s+([0-9.]+)\s*ms"
 )
 RE_REPLAY = re.compile(
     r"replay per frame \(last \d+\):\s*([0-9.]+)\s*draws,\s*replay\s+([0-9.]+)\s*ms.*?GPU busy\s+([0-9.]+)\s*ms.*?descriptor sets reused\s+(\d+),\s*new\s+(\d+)"
 )
+RE_UPLOADS = re.compile(r"replay per frame \(last \d+\):.*?texture uploads\s+[0-9.]+\s*\(([0-9.]+)\s*MB,\s*([0-9.]+)\s*ms\)")
+# One line per frame over the budget: the frame's whole time. A hitch (a frame shown a vsync late) is one over --hitch-ms
+RE_LONGFRAME = re.compile(r"\[longframe\].*?whole frame\s+([0-9.]+)\s*ms")
+RE_LOG_TIME = re.compile(r"^\[dm\]\s+([0-9.]+)s ")
+DEFAULT_MARKER = r"DM_CTL: env (\S+=\S*)"
 RE_ADAPTIVE = re.compile(
     r"adaptive frame rate:\s*([0-9.]+)\s*fps,\s*frame work p50\s+([0-9.]+)\s*/\s*p90\s+([0-9.]+)\s*/\s*p95\s+([0-9.]+)\s*ms.*?late on screen\s+(\d+)\s*of\s*64"
 )
@@ -78,6 +85,7 @@ def parse_log_text(
     preset: str = "nx2android",
     skip_first: int = 0,
     extra_metrics: Optional[Dict[str, Dict[str, Any]]] = None,
+    hitch_ms: float = 40.0,
 ) -> Dict[str, Any]:
     out: Dict[str, Any] = {
         "preset": preset,
@@ -104,6 +112,9 @@ def parse_log_text(
     late_cum: Optional[int] = None
     hwbuf_mbs: Optional[float] = None
     malloc_mbs: Optional[float] = None
+    upload_mb: List[float] = []
+    upload_ms: List[float] = []
+    long_frames: List[float] = []
 
     for line in text.splitlines():
         if "[RED]" in line:
@@ -142,6 +153,13 @@ def parse_log_text(
             if m:
                 hwbuf_mbs = float(m.group(1))
                 malloc_mbs = float(m.group(2))
+            m = RE_UPLOADS.search(line)
+            if m:
+                upload_mb.append(float(m.group(1)))
+                upload_ms.append(float(m.group(2)))
+            m = RE_LONGFRAME.search(line)
+            if m:
+                long_frames.append(float(m.group(1)))
 
     if preset == "nx2android":
         def trim(xs: List[float]) -> List[float]:
@@ -166,6 +184,11 @@ def parse_log_text(
             "display_late_cum": late_cum,
             "hwbuf_read_mbs": hwbuf_mbs,
             "malloc_read_mbs": malloc_mbs,
+            "upload_mb_per_frame": med(trim(upload_mb)),
+            "upload_ms_per_frame": med(trim(upload_ms)),
+            "long_frames": len(long_frames),
+            "hitches": sum(1 for x in long_frames if x > hitch_ms),
+            "hitch_ms": hitch_ms,
         })
     elif preset == "gfxinfo":
         m = RE_GFX_TOTAL.search(text)
@@ -204,6 +227,51 @@ def parse_log_text(
     out["unique_vuids"] = sorted(vuids)
     out["crash_markers"] = sorted(crashes)
     return out
+
+
+def split_windows(text: str, marker: str = DEFAULT_MARKER) -> List[Dict[str, Any]]:
+    """Cut a log at each line matching `marker` (a live toggle, e.g. `DM_CTL: env KEY=VALUE`). → [{label, t0, t1, text}], the first window labelled `start`.
+    Lines without a `[dm] <seconds>s` time stay in the current window; t0/t1 are None when no line in it had a time."""
+    rx = re.compile(marker)
+    wins: List[Dict[str, Any]] = [{"label": "start", "t0": None, "t1": None, "lines": []}]
+    for line in text.splitlines():
+        tm = RE_LOG_TIME.match(line)
+        t = float(tm.group(1)) if tm else None
+        m = rx.search(line)
+        if m:
+            wins.append({"label": m.group(1) if m.groups() else m.group(0), "t0": t, "t1": t, "lines": []})
+            continue
+        w = wins[-1]
+        if t is not None:
+            if w["t0"] is None or (w["t1"] is not None and t < w["t1"]):   # (a log whose clock restarts: its window counts from there)
+                w["t0"] = t
+            w["t1"] = t
+        w["lines"].append(line)
+    out = []
+    for w in wins:
+        if w["label"] == "start" and not any(l.strip() for l in w["lines"]):
+            continue
+        out.append({"label": w["label"], "t0": w["t0"], "t1": w["t1"], "text": "\n".join(w["lines"])})
+    return out
+
+
+def window_table(text: str, marker: str = DEFAULT_MARKER, preset: str = "nx2android", hitch_ms: float = 40.0) -> List[Dict[str, Any]]:
+    rows = []
+    for w in split_windows(text, marker):
+        r = parse_log_text(w["text"], preset=preset, hitch_ms=hitch_ms)
+        secs = (w["t1"] - w["t0"]) if w["t0"] is not None and w["t1"] is not None else None
+        rows.append({"label": w["label"], "t0": w["t0"], "seconds": round(secs, 1) if secs is not None else None, **{k: r.get(k) for k in (
+            "windows", "frame_p50_ms", "frame_p95_ms", "frame_max_ms", "replay_p50_ms", "gpu_p50_ms", "upload_mb_per_frame", "upload_ms_per_frame",
+            "long_frames", "hitches", "red_lines", "vuid_count")}})
+    return rows
+
+
+def format_windows(rows: List[Dict[str, Any]]) -> str:
+    cols = ("label", "seconds", "frame_p50_ms", "frame_p95_ms", "replay_p50_ms", "gpu_p50_ms", "upload_mb_per_frame", "long_frames", "hitches", "red_lines")
+    lines = [" | ".join(cols), " | ".join("---" for _ in cols)]
+    for r in rows:
+        lines.append(" | ".join("" if r.get(c) is None else str(r.get(c)) for c in cols))
+    return "\n".join(lines)
 
 
 def backup_saves(pkg: str, out_dir: Path, serial: str = "", remote_path: Optional[str] = None) -> Dict[str, Any]:
@@ -486,7 +554,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p_pl.add_argument("--preset", default="nx2android", choices=("nx2android", "gfxinfo", "generic"))
     p_pl.add_argument("--skip-first", type=int, default=0)
     p_pl.add_argument("--config", type=Path, default=None, help="Optional config JSON for extra_metrics")
+    p_pl.add_argument("--hitch-ms", type=float, default=40.0, help="A long frame over this counts as a hitch (default 40: 30 fps on 60 Hz)")
     p_pl.add_argument("--json", action="store_true")
+
+    p_win = sub.add_parser("windows", help="Cut a log at live-toggle marker lines and summarise each window (same-run A/B)")
+    p_win.add_argument("log", type=Path)
+    p_win.add_argument("--marker", default=DEFAULT_MARKER, help="Regex of a window's first line; group 1 is its label (default: DM_CTL env lines)")
+    p_win.add_argument("--preset", default="nx2android", choices=("nx2android", "generic"))
+    p_win.add_argument("--hitch-ms", type=float, default=40.0)
+    p_win.add_argument("--json", action="store_true")
 
     p_run = sub.add_parser("run", help="Run a controlled telemetry capture and append to ledger.jsonl")
     p_run.add_argument("config", type=Path)
@@ -536,8 +612,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             preset=args.preset,
             skip_first=args.skip_first,
             extra_metrics=extra,
+            hitch_ms=args.hitch_ms,
         )
         print(json.dumps(res, indent=2))
+        return 0
+
+    if args.cmd == "windows":
+        rows = window_table(args.log.read_text(encoding="utf-8", errors="replace"), marker=args.marker, preset=args.preset, hitch_ms=args.hitch_ms)
+        print(json.dumps(rows, indent=2) if args.json else format_windows(rows))
         return 0
 
     if args.cmd == "run":

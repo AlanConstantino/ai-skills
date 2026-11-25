@@ -14,6 +14,7 @@ Never work from vague descriptions ("still flickers a bit", "looks darker", "fee
 | Driver rejection / Vulkan UB | `VUID count` by unique ID | Single run with Khronos Validation Layer (`DM_VK_VALIDATE=1`) |
 | Missing HLE stubs / shader misses / sync stalls | `[RED]` line count by unique message | `scripts/probe.py parse-log` |
 | Audio buzz / crackle / stutter | `repeats`, `frame-edge clicks`, `gaps`, `clipping`, `underruns` | Raw PCM dump audit (`pcm_glitches.py`), separate from underrun logs |
+| Frame dips in combat / hitches | `frames over 1.2× budget per window` (e.g. `66/90 s → 1/90 s`) | Long-frame log lines, `probe.py windows` per live toggle |
 | Frame pacing judder / resyncs | `late_on_screen / 64`, `resyncs / 600`, `p95` & `p99` ms | Host timing log + `dumpsys SurfaceFlinger --latency` |
 
 ## 2. Zero-build toggle bisection first
@@ -71,7 +72,20 @@ Debug tools change GPU synchronization and memory layout:
 
 **Rule:** whenever turning on a debug tool makes a bug vanish, **do not trust the capture as clean** — instead, test each side effect the tool added one by one (extra barrier, pass cut, 1-texel depth read, transfer write-back). That almost always reveals the exact root cause!
 
-## 8. Telemetry traps on retail Android devices
+## 8. Hands-off automation (when the user wants to stay out of the loop)
+
+A user who says "automate this" still owns their saves and their device. What worked (`examples/case-nier-30fps-combat-dips.md`):
+
+1. **Back up saves first**, and use a **bench save slot** you may load and play in, never the user's story slot.
+2. **Drive the game with a refusal-guarded input loop** (`scripts/ab_windows.sh`, `STEPS`): sticks, camera, attack, fire. Never Confirm or menu
+   buttons (`FORBID`). Stop when the PID changes.
+3. **Toggle live, in pairs, inside one run** (`on → off → on → off`, 90-240 s each); sample temperatures and GPU clock every ~10 s.
+4. **Cut the pulled log per toggle** (`scripts/probe.py windows`) and judge by a count (hitches), plus replay/GPU/uploads for the cause.
+5. **Press menu buttons only after a screenshot you inspected yourself** shows the expected menu. Never press them blind and never score screenshots heuristically.
+6. **Restore everything** before the report: switches, device settings, `env.txt`, the release build. Then compare saves byte for byte.
+7. **Timebox and report.** Automation is not licence for an open-ended hunt: stop at the timebox with numbers and the next lever.
+
+## 9. Telemetry traps on retail Android devices
 
 - **`dumpsys thermalservice`** can report hours-old cached temperatures (e.g. 93 °C on a cool tablet). Always read multiple `/sys/class/thermal/thermal_zone*/temp` nodes (`scripts/device_health.sh`).
 - **Policy CPU caps vs heat:** a handheld can cap `scaling_max_freq` to 2.0 GHz at 55 °C due to Android thermal/power policy, not silicon throttling. Check both `scaling_cur_freq` AND `scaling_max_freq` against `cpuinfo_max_freq`.

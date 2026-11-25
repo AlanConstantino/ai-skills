@@ -5,9 +5,13 @@ from __future__ import annotations
 from array import array
 import json
 import math
+import os
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
+from typing import Optional
 import unittest
 
 SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
@@ -149,6 +153,41 @@ custom_metric=42.5
         self.assertEqual(res["vuid_count"], 1)
         self.assertEqual(res["custom"], 42.5)
 
+    def test_parse_frame_time_format_uploads_and_hitches(self) -> None:
+        log = """
+[dm]    10.0s [nvn] timing up to frame 300: frame time p50 33.40 / p95 37.30 / max 52.00 ms (300 frames); frame work p50 30.0 / p95 34.0 / max 50.0 ms (300 frames);
+[dm]    10.1s [vk] replay per frame (last 600): 2400 draws, replay 9.30 ms (descriptor sets 5.0, pipeline keys 0.3), queue submit 0.5 ms, uniform shadows 0 KB; GPU busy 21.1 ms; texture uploads 1.2 (0.62 MB, 0.40 ms); descriptor sets reused 100, new 900, key arena bypasses 0
+[dm]    10.2s [longframe] frame 301 (10.20 s) whole frame 36.1 ms, submit+present 9.0 ms, GPU 22.0 ms
+[dm]    10.3s [longframe] frame 302 (10.30 s) whole frame 51.0 ms, submit+present 30.0 ms, GPU 22.0 ms
+"""
+        res = probe.parse_log_text(log, preset="nx2android", hitch_ms=40.0)
+        self.assertEqual(res["frame_p50_ms"], 33.4)
+        self.assertEqual(res["frame_p95_ms"], 37.3)
+        self.assertEqual(res["upload_mb_per_frame"], 0.62)
+        self.assertEqual(res["upload_ms_per_frame"], 0.4)
+        self.assertEqual(res["long_frames"], 2)
+        self.assertEqual(res["hitches"], 1)
+
+    def test_windows_split_at_live_toggles(self) -> None:
+        log = """
+[dm] 168854.4s header line with another clock
+[dm]     1.0s [longframe] frame 1 (1.0 s) whole frame 45.0 ms
+[dm]     5.0s DM_CTL: env DM_X=1
+[dm]     6.0s [longframe] frame 2 (6.0 s) whole frame 36.0 ms
+[dm]    95.0s [nvn] timing up to frame 300: frame time p50 33.40 / p95 37.30 / max 39.00 ms (300 frames);
+[dm]    95.1s DM_CTL: env DM_X=0
+[dm]    96.0s [longframe] frame 3 (96.0 s) whole frame 48.0 ms
+[dm]    97.0s [longframe] frame 4 (97.0 s) whole frame 52.0 ms
+[dm]   185.0s [nvn] timing up to frame 600: frame time p50 33.40 / p95 41.20 / max 52.00 ms (300 frames);
+"""
+        rows = probe.window_table(log, hitch_ms=40.0)
+        self.assertEqual([r["label"] for r in rows], ["start", "DM_X=1", "DM_X=0"])
+        self.assertEqual(rows[0]["seconds"], 0.0)   # the restarted clock: from 1.0 s, not from 168854 s
+        self.assertEqual([r["hitches"] for r in rows], [1, 0, 2])
+        self.assertEqual(rows[1]["seconds"], 90.0)
+        self.assertEqual(rows[2]["frame_p95_ms"], 41.2)
+        self.assertIn("DM_X=0", probe.format_windows(rows))
+
     def test_parse_gfxinfo_preset(self) -> None:
         gfx = """
 Total frames rendered: 600
@@ -188,6 +227,41 @@ Janky frames: 12 (2.00%)
         txt = probe.format_ledger([{"name": "ctl-a", "frame_p50_ms": 16.7, "flags": []}])
         self.assertIn("ctl-a", txt)
         self.assertIn("16.7", txt)
+
+
+class TestAbWindows(unittest.TestCase):
+    """The hands-off A/B driver's input-loop guard (no device needed)."""
+    SCRIPT = SCRIPTS / "ab_windows.sh"
+
+    def _check(self, steps: str, forbid: Optional[str] = None) -> "subprocess.CompletedProcess[str]":
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "steps.txt"
+            f.write_text(steps, encoding="utf-8")
+            env = dict(os.environ)
+            if forbid is not None:
+                env["FORBID"] = forbid
+            return subprocess.run(["bash", str(self.SCRIPT), "--check-steps", str(f)], capture_output=True, text=True, env=env)
+
+    @unittest.skipUnless(shutil.which("bash"), "bash is required")
+    def test_accepts_stick_and_attack_loop(self) -> None:
+        r = self._check("LUp+RRight~2.5 2.7   # run in a circle\nY~0.2 0.5\n\n# comment\nR~1.5 1.7\n")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("steps ok: 3", r.stdout)
+
+    @unittest.skipUnless(shutil.which("bash"), "bash is required")
+    def test_refuses_confirm_and_menu_presses(self) -> None:
+        for steps in ("A~0.2 0.5\n", "LUp+A~1 1\n", "Plus 1\n"):
+            r = self._check(steps)
+            self.assertEqual(r.returncode, 1, steps)
+            self.assertIn("forbidden button", r.stderr)
+        self.assertEqual(self._check("B~0.2 0.5\n", forbid="B").returncode, 1)
+        self.assertEqual(self._check("A~0.2 0.5\n", forbid="").returncode, 1)   # empty keeps the default
+        self.assertEqual(self._check("A~0.2 0.5\n", forbid="none").returncode, 0)
+
+    @unittest.skipUnless(shutil.which("bash"), "bash is required")
+    def test_refuses_bad_waits_and_empty_files(self) -> None:
+        self.assertEqual(self._check("Y~0.2 soon\n").returncode, 1)
+        self.assertEqual(self._check("# nothing\n").returncode, 2)
 
 
 if __name__ == "__main__":
