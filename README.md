@@ -11,6 +11,7 @@ Each skill is a self-contained folder under [`skills/`](skills/).
 |---|---|---|---|
 | [web-searx](skills/web-searx/) | Web search and page reading through your own SearXNG instance. Standard library only. | [Alan Constantino](https://github.com/AlanConstantino) | MIT |
 | [inference-optimisation](skills/inference-optimisation/) | Hill-climb the serving speed of a local LLM server: theoretical ceilings, controlled A/B runs, a results ledger, long-context gates. | [Sybil Solutions](https://github.com/sybil-solutions/inference-optimisation-skill) | MIT |
+| [android-game-porting](skills/android-game-porting/) | Hill-climb a native Android game port from bring-up to full-speed playable: frame/RAM ceilings, countable bug bisection, controlled device A/B runs, a results ledger, release gates. | [Alan Constantino](https://github.com/AlanConstantino) | MIT |
 
 ## Install
 

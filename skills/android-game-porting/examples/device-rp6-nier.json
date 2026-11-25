@@ -1,0 +1,25 @@
+{
+  "game": "NieR:Automata The End of YoRHa Edition (1.0.2/1.0.3)",
+  "device": "Retroid Pocket 6 (Snapdragon 8 Gen 2, Adreno 740, Turnip 27.0.0-R2)",
+  "display_hz": 120,
+  "target_fps": 60,
+  "engine_cap_fps": 60,
+  "measured": {
+    "game_cpu_ms": 5.2,
+    "replay_ms": 4.4,
+    "gpu_ms": 11.8,
+    "gpu_noloadstore_ms": 9.9,
+    "sustained_gpu_ms": 13.1,
+    "hwbuf_read_mbs": 14500,
+    "malloc_read_mbs": 17200
+  },
+  "memory": {
+    "device_ram_mib": 12288,
+    "idle_available_mib": 7800,
+    "lmk_headroom_mib": 1536,
+    "peak_rss_mib": 3450,
+    "largest_pool_mib": 1336,
+    "zc_chunk_mib": 256,
+    "gralloc_abort_mib": 812
+  }
+}

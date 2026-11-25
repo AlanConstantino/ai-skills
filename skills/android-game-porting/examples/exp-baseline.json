@@ -1,0 +1,24 @@
+{
+  "name": "ctl-a-city-ruins",
+  "preset": "nx2android",
+  "package": "org.nx2a.nierautomata",
+  "serial": "",
+  "log_remote_path": "/sdcard/Android/data/org.nx2a.nierautomata/files/log.txt",
+  "env_remote_path": "/sdcard/Android/data/org.nx2a.nierautomata/files/env.txt",
+  "save_remote_path": "/sdcard/Android/data/org.nx2a.nierautomata/files/save",
+  "mode": "attach",
+  "sample_seconds": 30,
+  "target_fps": 60,
+  "scene": "City Ruins - Resistance Camp overlook, stationary",
+  "driver": "Turnip 27.0.0-R2",
+  "guardrails": {
+    "require_ac": false,
+    "min_battery_pct": 25,
+    "max_temp_c": 85,
+    "max_temp_drift_c": 6,
+    "max_rss_mib": 6000,
+    "max_red_lines": 0,
+    "max_vuids": 0
+  },
+  "extra_metrics": {}
+}
