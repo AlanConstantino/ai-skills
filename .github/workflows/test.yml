@@ -1,10 +1,10 @@
-name: web-searx tests
+name: skill tests
 
 on:
   push:
-    paths: ["skills/web-searx/**", ".github/workflows/test.yml"]
+    paths: ["skills/*/scripts/**", "skills/*/tests/**", "skills/*/examples/**", ".github/workflows/test.yml"]
   pull_request:
-    paths: ["skills/web-searx/**", ".github/workflows/test.yml"]
+    paths: ["skills/*/scripts/**", "skills/*/tests/**", "skills/*/examples/**", ".github/workflows/test.yml"]
 
 jobs:
   test:
@@ -23,6 +23,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: Run offline tests
+      - name: Run web-searx offline tests
         working-directory: skills/web-searx/tests
+        run: python -m unittest -v
+      - name: Run android-game-porting offline tests
+        working-directory: skills/android-game-porting/tests
+        run: python -m unittest -v
+      - name: Run hill-climbing offline tests
+        working-directory: skills/hill-climbing/tests
         run: python -m unittest -v
